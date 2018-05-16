@@ -1,46 +1,55 @@
 #include <iostream>
+#include <algorithm>
+#include <utility>
 
 using namespace std;
-using long long ll;
+using ll=long long;
 
-ll mdp[1001][1001];
-ll ndp[1001][1001];
-ll ss;
+ll dp[1001][1001]; //現在左:i番目右:j番目のとき、先手が取るスコア
+// i<A+1,j<B+1
 
 int main()
 {
 	int A,B;
-	int a[1000],b[1000];
-	int p[2];
-	p[0]=0;
-	p[1]=0;
+	ll a[1001],b[1001];
+	ll rui[1001];
+	rui[0]=0;//左の山の上から取った累積和
+	ll ss=0;
 	cin>>A>>B;
-	ss=0;
 	for(int i=0;i<A;i++)
 	{
 		cin>>a[i];
-		ss+=a[i];
 	}
 	for(int i=0;i<B;i++)
 	{
 		cin>>b[i];
-		ss+=b[i];
 	}
-
-	fill(mdp[0],mdp[1001],-1);
-	fill(ndp[0],ndp[1001],-1);
-	mdp[0][0]=0;
-	ndp[0][0]=0;
-	//すぬけ最後取る
-	if((A+B)%2==1)
+	a[A]=0;
+	b[B]=0;
+	reverse(a,a+A+1);
+	reverse(b,b+B+1);
+	for(int i=1;i<A+1;i++)
+		rui[i]=rui[i-1]+a[i];
+	fill(dp[0],dp[1001],-1);
+	dp[0][0]=0;
+	//dpの更新
+	for(int i=0;i<A+1;i++)
 	{
-		ndp[1][0]=a[A-1];
-		ndp[0][1]=b[B-1];
-	}else{
-		//すめけ最後取る
-		mdp[1][0]=a[A-1];
-		mdp[0][1]=b[B-1];
+		ss=rui[i];
+		for(int j=0;j<B+1;j++)
+		{
+			ss+=b[j];
+			if(i==0 && j==0)
+				continue;
+			else if(i==0)
+				dp[i][j]=ss-dp[i][j-1];
+			else if(j==0)
+				dp[i][j]=ss-dp[i-1][j];
+			else
+				dp[i][j]=max(ss-dp[i][j-1],ss-dp[i-1][j]);
+			//cerr<<ss<<endl;
+		}
 	}
-
+	cout<<dp[A][B]<<endl;
 	return 0;
 }
